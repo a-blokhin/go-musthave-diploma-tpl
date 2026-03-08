@@ -31,11 +31,9 @@ type BalanceRepository interface {
 	GetByUserID(ctx context.Context, userID uuid.UUID) (*model.Balance, error)
 	Update(ctx context.Context, balance *model.Balance) error
 	AddAccrual(ctx context.Context, userID uuid.UUID, amount float32) error
-	Withdraw(ctx context.Context, userID uuid.UUID, amount float32) error
+	WithdrawWithRecord(ctx context.Context, userID uuid.UUID, orderNumber string, amount float32) error
 }
 
 type WithdrawalRepository interface {
-	Create(ctx context.Context, withdrawal *model.Withdrawal) error
 	GetByUserID(ctx context.Context, userID uuid.UUID) ([]*model.Withdrawal, error)
-	ExistsByOrderNumber(ctx context.Context, orderNumber string) (bool, error)
 }

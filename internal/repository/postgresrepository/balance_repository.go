@@ -89,22 +89,47 @@ func (r *balanceRepository) AddAccrual(ctx context.Context, userID uuid.UUID, am
 	return nil
 }
 
-func (r *balanceRepository) Withdraw(ctx context.Context, userID uuid.UUID, amount float32) error {
-	query := `
+func (r *balanceRepository) WithdrawWithRecord(ctx context.Context, userID uuid.UUID, orderNumber string, amount float32) error {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	var currentBalance float32
+	balanceQuery := `SELECT current_balance FROM user_balances WHERE user_id = $1 FOR UPDATE`
+	err = tx.QueryRow(ctx, balanceQuery, userID).Scan(&currentBalance)
+	if err != nil {
+		return fmt.Errorf("failed to get balance: %w", err)
+	}
+
+	if currentBalance < amount {
+		return model.ErrInsufficientBalance
+	}
+
+	updateBalanceQuery := `
 		UPDATE user_balances
 		SET current_balance = current_balance - $1,
 			withdrawn_balance = withdrawn_balance + $1,
 			updated_at = NOW()
-		WHERE user_id = $2 AND current_balance >= $1
+		WHERE user_id = $2
 	`
-
-	cmdTag, err := r.pool.Exec(ctx, query, amount, userID)
+	_, err = tx.Exec(ctx, updateBalanceQuery, amount, userID)
 	if err != nil {
-		return fmt.Errorf("failed to withdraw: %w", err)
+		return fmt.Errorf("failed to update balance: %w", err)
 	}
 
-	if cmdTag.RowsAffected() == 0 {
-		return model.ErrInsufficientBalance
+	withdrawalQuery := `
+		INSERT INTO withdrawals (id, order_number, user_id, sum, processed_at)
+		VALUES (gen_random_uuid(), $1, $2, $3, NOW())
+	`
+	_, err = tx.Exec(ctx, withdrawalQuery, orderNumber, userID, amount)
+	if err != nil {
+		return fmt.Errorf("failed to create withdrawal: %w", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return nil

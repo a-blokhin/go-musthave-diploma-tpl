@@ -225,17 +225,17 @@ func (_c *BalanceRepository_Update_Call) RunAndReturn(run func(context.Context, 
 	return _c
 }
 
-// Withdraw provides a mock function with given fields: ctx, userID, amount
-func (_m *BalanceRepository) Withdraw(ctx context.Context, userID uuid.UUID, amount float32) error {
-	ret := _m.Called(ctx, userID, amount)
+// WithdrawWithRecord provides a mock function with given fields: ctx, userID, orderNumber, amount
+func (_m *BalanceRepository) WithdrawWithRecord(ctx context.Context, userID uuid.UUID, orderNumber string, amount float32) error {
+	ret := _m.Called(ctx, userID, orderNumber, amount)
 
 	if len(ret) == 0 {
-		panic("no return value specified for Withdraw")
+		panic("no return value specified for WithdrawWithRecord")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, float32) error); ok {
-		r0 = rf(ctx, userID, amount)
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, string, float32) error); ok {
+		r0 = rf(ctx, userID, orderNumber, amount)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -243,32 +243,33 @@ func (_m *BalanceRepository) Withdraw(ctx context.Context, userID uuid.UUID, amo
 	return r0
 }
 
-// BalanceRepository_Withdraw_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Withdraw'
-type BalanceRepository_Withdraw_Call struct {
+// BalanceRepository_WithdrawWithRecord_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WithdrawWithRecord'
+type BalanceRepository_WithdrawWithRecord_Call struct {
 	*mock.Call
 }
 
-// Withdraw is a helper method to define mock.On call
+// WithdrawWithRecord is a helper method to define mock.On call
 //   - ctx context.Context
 //   - userID uuid.UUID
+//   - orderNumber string
 //   - amount float32
-func (_e *BalanceRepository_Expecter) Withdraw(ctx interface{}, userID interface{}, amount interface{}) *BalanceRepository_Withdraw_Call {
-	return &BalanceRepository_Withdraw_Call{Call: _e.mock.On("Withdraw", ctx, userID, amount)}
+func (_e *BalanceRepository_Expecter) WithdrawWithRecord(ctx interface{}, userID interface{}, orderNumber interface{}, amount interface{}) *BalanceRepository_WithdrawWithRecord_Call {
+	return &BalanceRepository_WithdrawWithRecord_Call{Call: _e.mock.On("WithdrawWithRecord", ctx, userID, orderNumber, amount)}
 }
 
-func (_c *BalanceRepository_Withdraw_Call) Run(run func(ctx context.Context, userID uuid.UUID, amount float32)) *BalanceRepository_Withdraw_Call {
+func (_c *BalanceRepository_WithdrawWithRecord_Call) Run(run func(ctx context.Context, userID uuid.UUID, orderNumber string, amount float32)) *BalanceRepository_WithdrawWithRecord_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(uuid.UUID), args[2].(float32))
+		run(args[0].(context.Context), args[1].(uuid.UUID), args[2].(string), args[3].(float32))
 	})
 	return _c
 }
 
-func (_c *BalanceRepository_Withdraw_Call) Return(_a0 error) *BalanceRepository_Withdraw_Call {
+func (_c *BalanceRepository_WithdrawWithRecord_Call) Return(_a0 error) *BalanceRepository_WithdrawWithRecord_Call {
 	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *BalanceRepository_Withdraw_Call) RunAndReturn(run func(context.Context, uuid.UUID, float32) error) *BalanceRepository_Withdraw_Call {
+func (_c *BalanceRepository_WithdrawWithRecord_Call) RunAndReturn(run func(context.Context, uuid.UUID, string, float32) error) *BalanceRepository_WithdrawWithRecord_Call {
 	_c.Call.Return(run)
 	return _c
 }

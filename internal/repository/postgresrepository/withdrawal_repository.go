@@ -19,24 +19,6 @@ func NewWithdrawalRepository(pool *pgxpool.Pool) repository.WithdrawalRepository
 	return &withdrawalRepository{pool: pool}
 }
 
-func (r *withdrawalRepository) Create(ctx context.Context, withdrawal *model.Withdrawal) error {
-	query := `
-		INSERT INTO withdrawals (id, order_number, user_id, sum, processed_at)
-		VALUES ($1, $2, $3, $4, $5)
-	`
-
-	_, err := r.pool.Exec(ctx, query, withdrawal.ID, withdrawal.OrderNumber, withdrawal.UserID, withdrawal.Sum, withdrawal.ProcessedAt)
-	if err != nil {
-
-		if pgErr, ok := err.(interface{ Code() string }); ok && pgErr.Code() == "23505" {
-			return fmt.Errorf("withdrawal with order number %s already exists", withdrawal.OrderNumber)
-		}
-		return fmt.Errorf("failed to create withdrawal: %w", err)
-	}
-
-	return nil
-}
-
 func (r *withdrawalRepository) GetByUserID(ctx context.Context, userID uuid.UUID) ([]*model.Withdrawal, error) {
 	query := `
 		SELECT id, order_number, user_id, sum, processed_at
@@ -72,18 +54,4 @@ func (r *withdrawalRepository) GetByUserID(ctx context.Context, userID uuid.UUID
 	}
 
 	return withdrawals, nil
-}
-
-func (r *withdrawalRepository) ExistsByOrderNumber(ctx context.Context, orderNumber string) (bool, error) {
-	query := `
-		SELECT EXISTS(SELECT 1 FROM withdrawals WHERE order_number = $1)
-	`
-
-	var exists bool
-	err := r.pool.QueryRow(ctx, query, orderNumber).Scan(&exists)
-	if err != nil {
-		return false, fmt.Errorf("failed to check if withdrawal exists: %w", err)
-	}
-
-	return exists, nil
 }

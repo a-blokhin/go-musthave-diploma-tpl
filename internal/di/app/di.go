@@ -108,7 +108,10 @@ func (d *DI) initRepos() {
 
 func (d *DI) initServices() {
 
-	jwtSecret := "test-secret"
+	jwtSecret := d.config.JWTSecret
+	if jwtSecret == "" {
+		d.logger.Fatal("JWT_SECRET environment variable or -j flag is required")
+	}
 	d.services.jwtService = auth.NewJWTService(jwtSecret)
 
 	d.services.passwordService = auth.DefaultPasswordService()
@@ -163,7 +166,6 @@ func (d *DI) initUsecases() {
 
 	d.usecases.withdraw = withdrawusecase.New(
 		d.repos.balanceRepo,
-		d.repos.withdrawalRepo,
 		d.logger,
 	)
 
